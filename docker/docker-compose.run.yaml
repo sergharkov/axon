@@ -1,0 +1,45 @@
+networks:
+  axon:
+    name: axon-net
+services:
+  axon-app:
+    build:
+      context: /axon/hub-backend
+      dockerfile: ./docker/app.Dockerfile
+    entrypoint:
+    - bash
+    - -c
+    - yarn run dev
+    image: axon-app:06.05.24_14.08
+    networks:
+      axon: null
+    ports:
+    - published: 3001
+      target: 3001
+    restart: always
+  some-redis:
+    image: redis
+    networks:
+      axon: null
+    ports:
+    - published: 6379
+      target: 6379
+    restart: always
+  timescaledb:
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+    image: timescale/timescaledb-ha:pg16
+    networks:
+      axon: null
+    ports:
+    - published: 5432
+      target: 5432
+    restart: unless-stopped
+    volumes:
+    - pgdata:/home/postgres/pgdata/data:rw
+version: '3'
+volumes:
+  pgdata: {}
+
